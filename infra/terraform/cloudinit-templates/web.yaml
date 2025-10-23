@@ -1,0 +1,45 @@
+#cloud-config
+##############################################
+# cloudinit/web.yaml
+# - VM 내부에서 첫 부팅 시 cloud-init 에이전트가 실행
+# - 오프라인 모드 가정: nginx는 "이미지에 포함"되어 있고, 여기서는 설정/활성화/파일 배포만 수행
+# - SSH 공개키/사용자/호스트네임 등 기본 설정
+##############################################
+
+# (선택) 호스트네임 설정
+hostname: web-01
+
+# 기본 사용자/SSH 키 등록
+users:
+  - name: ubuntu
+    # 여기에 "내 공개키"를 넣어두면 컨트롤러 네임스페이스 경유 SSH가 쉬워짐
+    # 일반적으로 RSA/ECDSA/ED25519 등 공개키 한 줄
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3Nz... 내_공개키 ...
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+
+# 테스트용 웹 페이지 배포
+write_files:
+  - path: /var/www/html/index.html
+    permissions: '0644'
+    owner: root:root
+    content: |
+      <!doctype html>
+      <html>
+      <head><meta charset="utf-8"><title>web-01</title></head>
+      <body>
+        <h1>Hello from web-01 (offline)</h1>
+        <p>이 페이지는 cloud-init의 write_files로 배포되었습니다.</p>
+      </body>
+      </html>
+
+# 부팅 후 실행할 커맨드(nginx는 이미지에 포함되어 있다고 가정)
+runcmd:
+  # nginx 서비스 활성화 및 즉시 시작
+  - systemctl enable --now nginx || true
+  # 방화벽/SELinux가 있으면 여기서 규칙/컨텍스트 조정 가능 (Ubuntu 기본은 보통 필요 없음)
+  # - ufw allow 80/tcp || true
+
+# 마지막 안내 메시지(콘솔/로그에서 확인 가능)
+final_message: "Provisioned role=web via Terraform on OpenStack (offline mode)"

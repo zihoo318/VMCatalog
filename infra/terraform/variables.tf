@@ -11,10 +11,10 @@
 # 4. 변수 기본값: variables.tf 안에서 default = ...를 지정
 ##############################################
 
-# 붙일 네트워크 ID
-variable "network_id" {
+# 사용할 VM의 이름
+variable "name" {
   type        = string
-  description = "UUID of the Neutron network (e.g., private-net)"
+  description = "name (웹에서 사용자가 입력한 VM의 이름)"
 }
 
 # 사용할 이미지 ID
@@ -29,10 +29,10 @@ variable "flavor_id" {
   description = "Flavor ID to use (e.g., 1 for m1.tiny)"
 }
 
-# Nova 키페어 이름 (이미 OpenStack에 등록된 것)
-variable "key_name" {
+# 붙일 네트워크 ID
+variable "network_id" {
   type        = string
-  description = "Existing Nova keypair name"
+  description = "UUID of the Neutron network (e.g., private-net)"
 }
 
 # cloud-init user_data (문자열)

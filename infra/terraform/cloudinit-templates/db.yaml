@@ -1,0 +1,82 @@
+##############################################
+# cloudinit/db.yaml
+# - 오프라인 모드: 패키지 설치/업데이트 없음
+# - 키페어 기반 SSH 접속(PasswordAuthentication 비활성화)
+# - DB 서비스는 이미지에 이미 포함되었다고 가정
+# - name == hostname 정책: "__HOSTNAME__" 위치에 호스트네임 주입
+##############################################
+
+preserve_hostname: false
+manage_etc_hosts: true
+hostname: "__HOSTNAME__"
+
+# 키페어 기반 접속: 이미지 기본 사용자 유지
+users: [ default ]
+ssh_pwauth: false
+
+package_update: false
+package_upgrade: false
+packages: []
+
+# 공통 설정 파일(두 경로 모두 배포: MySQL 계열/ MariaDB 계열 호환)
+write_files:
+  - path: /etc/mysql/conf.d/99-vmcatalog.cnf
+    permissions: '0644'
+    owner: root:root
+    content: |
+      [mysqld]
+      bind-address=0.0.0.0
+      datadir=/var/lib/mysql
+      # 필요 시 추가 옵션 여기에
+
+  - path: /etc/mysql/mariadb.conf.d/99-vmcatalog.cnf
+    permissions: '0644'
+    owner: root:root
+    content: |
+      [mysqld]
+      bind-address=0.0.0.0
+      datadir=/var/lib/mysql
+      # 필요 시 추가 옵션 여기에
+
+runcmd:
+  - |
+    #!/bin/bash
+    set -euo pipefail
+
+    # 1) 데이터 볼륨(/dev/vdb)이 있으면 초기화/마운트 (이미 포맷된 경우 재포맷 방지)
+    if [ -b /dev/vdb ]; then
+      if ! blkid /dev/vdb >/dev/null 2>&1; then
+        mkfs.ext4 -F /dev/vdb
+      fi
+      mkdir -p /var/lib/mysql
+      # /etc/fstab에 없으면 추가
+      if ! grep -q "/dev/vdb /var/lib/mysql" /etc/fstab; then
+        UUID=$(blkid -s UUID -o value /dev/vdb)
+        echo "UUID=${UUID} /var/lib/mysql ext4 defaults,nofail 0 2" >> /etc/fstab
+      fi
+      mount -a || mount /dev/vdb /var/lib/mysql
+      chown -R mysql:mysql /var/lib/mysql || true
+    fi
+
+    # 2) DB 서비스 활성화(있을 때만)
+    if systemctl list-unit-files | grep -q '^mariadb\.service'; then
+      systemctl enable --now mariadb || true
+    elif systemctl list-unit-files | grep -q '^mysql\.service'; then
+      systemctl enable --now mysql || true
+    fi
+
+    # 3) SSH: 비밀번호 로그인 차단 유지(키페어만)
+    if grep -qE '^[#\s]*PasswordAuthentication' /etc/ssh/sshd_config; then
+      sed -i 's/^[#\s]*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+    else
+      echo 'PasswordAuthentication no' >> /etc/ssh/sshd_config
+    fi
+    if grep -qE '^[#\s]*PubkeyAuthentication' /etc/ssh/sshd_config; then
+      sed -i 's/^[#\s]*PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+    else
+      echo 'PubkeyAuthentication yes' >> /etc/ssh/sshd_config
+    fi
+    systemctl restart ssh || systemctl restart sshd || true
+
+timezone: Asia/Seoul
+final_message: "Provisioned DB (offline, key-based SSH, __HOSTNAME__)"

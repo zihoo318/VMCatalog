@@ -13,7 +13,7 @@ public class OrderController {
 
     @PostMapping("/web")
     public ResponseEntity<?> create(@RequestBody OrderRequest dto) throws Exception {
-        return ResponseEntity.ok(tf.applyWebVm(dto));
+        return ResponseEntity.ok(tf.applyByTemplate(dto));
     }
 
     @DeleteMapping("/{orderId}")

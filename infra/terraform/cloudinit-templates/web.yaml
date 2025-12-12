@@ -1,45 +1,93 @@
 #cloud-config
 ##############################################
-# cloudinit/web.yaml
-# - VM 내부에서 첫 부팅 시 cloud-init 에이전트가 실행
-# - 오프라인 모드 가정: nginx는 "이미지에 포함"되어 있고, 여기서는 설정/활성화/파일 배포만 수행
-# - SSH 공개키/사용자/호스트네임 등 기본 설정
+# web.yaml.tpl (offline + password login)
+# - 오프라인: 패키지 설치 시도 없음
+# - 입력: __HOSTNAME__, __HASHED_PASSWORD__ (SHA-512)  *아래 설명 참고
 ##############################################
 
-# (선택) 호스트네임 설정
-hostname: web-01
+preserve_hostname: false
+manage_etc_hosts: true
+hostname: "__HOSTNAME__"
 
-# 기본 사용자/SSH 키 등록
+# 기본 사용자: Ubuntu 이미지는 대개 'ubuntu'
+# (RHEL/Alma/Rocky 계열은 'cloud-user'인 경우가 많으니 name만 바꿔 쓰세요)
 users:
   - name: ubuntu
-    # 여기에 "내 공개키"를 넣어두면 컨트롤러 네임스페이스 경유 SSH가 쉬워짐
-    # 일반적으로 RSA/ECDSA/ED25519 등 공개키 한 줄
-    ssh_authorized_keys:
-      - ssh-ed25519 AAAAC3Nz... 내_공개키 ...
+    lock_passwd: false
+    # SHA-512 해시 사용 권장. 예) openssl passwd -6 'PlainPassword'
+    # 결과 형태: $6$.... 로 시작
+    passwd: "__HASHED_PASSWORD__"
     sudo: ALL=(ALL) NOPASSWD:ALL
     shell: /bin/bash
 
-# 테스트용 웹 페이지 배포
+# SSH 비번 로그인 허용
+ssh_pwauth: true
+
+# 최초 로그인 시 비번 변경 강제(선택)
+chpasswd:
+  expire: true
+
+# 패키지 작업 비활성(오프라인 안전)
+package_update: false
+package_upgrade: false
+packages: []
+
+# 테스트 페이지(임시 위치에 작성 후 runcmd에서 문서 루트로 복사)
 write_files:
-  - path: /var/www/html/index.html
+  - path: /opt/vmcatalog/web-index.html
     permissions: '0644'
     owner: root:root
     content: |
       <!doctype html>
       <html>
-      <head><meta charset="utf-8"><title>web-01</title></head>
+      <head><meta charset="utf-8"><title>__HOSTNAME__</title></head>
       <body>
-        <h1>Hello from web-01 (offline)</h1>
-        <p>이 페이지는 cloud-init의 write_files로 배포되었습니다.</p>
+        <h1>Hello from __HOSTNAME__ (offline)</h1>
+        <p>This page was deployed by cloud-init.</p>
       </body>
       </html>
 
-# 부팅 후 실행할 커맨드(nginx는 이미지에 포함되어 있다고 가정)
 runcmd:
-  # nginx 서비스 활성화 및 즉시 시작
-  - systemctl enable --now nginx || true
-  # 방화벽/SELinux가 있으면 여기서 규칙/컨텍스트 조정 가능 (Ubuntu 기본은 보통 필요 없음)
-  # - ufw allow 80/tcp || true
+  - |
+    #!/bin/bash
+    set -euo pipefail
 
-# 마지막 안내 메시지(콘솔/로그에서 확인 가능)
-final_message: "Provisioned role=web via Terraform on OpenStack (offline mode)"
+    # 1) sshd에 PasswordAuthentication yes 강제
+    if grep -qE '^[#\s]*PasswordAuthentication' /etc/ssh/sshd_config; then
+      sed -i 's/^[#\s]*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+    else
+      echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config
+    fi
+    # 필요하면 다음도 해제: ChallengeResponseAuthentication no (주로 기본값이 no)
+    if grep -qE '^[#\s]*ChallengeResponseAuthentication' /etc/ssh/sshd_config; then
+      sed -i 's/^[#\s]*ChallengeResponseAuthentication.*/ChallengeResponseAuthentication no/' /etc/ssh/sshd_config
+    else
+      echo 'ChallengeResponseAuthentication no' >> /etc/ssh/sshd_config
+    fi
+
+    # 2) SSH 서비스 재시작
+    systemctl restart ssh || systemctl restart sshd || true
+
+    # 3) (선택) 비번 만료 강제(최초 로그인 시 변경)
+    passwd -e ubuntu || chage -d 0 ubuntu || true
+
+    # 4) Nginx가 이미지에 이미 있을 때만 활성화 및 인덱스 복사
+    if command -v nginx >/dev/null 2>&1; then
+      systemctl enable --now nginx || service nginx start || true
+
+      if [ -d /var/www/html ]; then
+        cp -f /opt/vmcatalog/web-index.html /var/www/html/index.html
+      elif [ -d /usr/share/nginx/html ]; then
+        cp -f /opt/vmcatalog/web-index.html /usr/share/nginx/html/index.html
+      else
+        ROOT_DIR=$(awk '/root /{print $2}' /etc/nginx/nginx.conf /etc/nginx/conf.d/*.conf 2>/dev/null | head -n1 | tr -d ';')
+        if [ -n "${ROOT_DIR:-}" ] && [ -d "$ROOT_DIR" ]; then
+          cp -f /opt/vmcatalog/web-index.html "$ROOT_DIR/index.html"
+        fi
+      fi
+    else
+      echo "[vmcatalog] INFO: nginx not present (offline mode) - skipping" | tee -a /var/log/vmcatalog.log
+    fi
+
+timezone: Asia/Seoul
+final_message: "Provisioned role=web (offline, password-login) on __HOSTNAME__"

@@ -3,7 +3,6 @@ package com.example.VMCatalog;
 import com.example.VMCatalog.DTO.OrderResult;
 import com.example.VMCatalog.DTO.OrderRequest;
 import com.example.VMCatalog.DTO.TemplateType;
-import com.example.VMCatalog.DTO.TemplateDefaults;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -84,7 +83,7 @@ public class TerraformService {
                 flavor_id  = "%s"
                 user_data  = file("./cloudinit/%s")
                 """.formatted(
-                name, defaultNetworkId, defaultImageId, defaultFlavorId, defaultKeyName, cloudinitFileName
+                name, defaultNetworkId, defaultImageId, defaultFlavorId, cloudinitFileName
         );
         Files.writeString(orderDir.resolve("terraform.tfvars"), tfvars);
 
@@ -100,7 +99,13 @@ public class TerraformService {
         String serverName = getOutputValue(outputs, "server_name", "web_server_name", "db_server_name");
         Object ipInfo     = getOutputObject(outputs, "ip_info", "web_ip_info", "db_ip_info");
 
-        return new OrderResult(orderId, true, serverId, serverName, ipInfo);
+        return new OrderResult(
+                orderId,        // 생성된 주문ID(작업폴더 키)
+                true,           // created
+                serverId,       // Nova 인스턴스 ID
+                serverName,     // Nova 인스턴스 이름
+                ipInfo          // IP 정보(모듈 output 그대로: List/Map 등)
+        );
     }
 
     public void destroy(String orderId) throws Exception {

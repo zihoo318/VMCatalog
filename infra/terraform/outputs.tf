@@ -4,15 +4,15 @@
 
 # 실행 후 출력값 정의: 생성된 VM의 네트워크 정보 보기 출력
 output "web_ip_info" {
-  value = openstack_compute_instance_v2.web.network
+  value = openstack_compute_instance_v2.vm.network
   description = "VM이 받은 프라이빗 IP 목록"
 }
 
 output "web_server_id" {
-  value       = openstack_compute_instance_v2.web.id
+  value       = openstack_compute_instance_v2.vm.id
   description = "Nova server ID"
 }
 
 output "web_server_name" {
-  value       = openstack_compute_instance_v2.web.name
+  value       = openstack_compute_instance_v2.vm.name
 }

@@ -2,437 +2,238 @@
 <html lang="ko">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>VMCatalog — 템플릿 카탈로그 (오프라인)</title>
-    <style>
-        :root{
-          --bg:#f6f7fb; --panel:#ffffff; --panel-2:#f2f6ff; --text:#0c1633; --muted:#5c6a92;
-          --accent:#2563eb; --accent-2:#10b981; --danger:#ef4444; --line:#e6ebff;
-          --radius-xl:18px; --radius-lg:16px; --radius-md:12px; --shadow:0 12px 28px rgba(17,24,39,.10);
-        }
-        *{box-sizing:border-box}
-        html,body{height:100%}
-        body{margin:0;color:var(--text);background:
-          radial-gradient(1600px 800px at -10% -20%, #eaf0ff, transparent),
-          radial-gradient(1600px 900px at 110% -20%, #eef4ff, transparent),
-          var(--bg);
-          font: 15px/1.55 system-ui,-apple-system,Segoe UI,Roboto,Noto Sans KR,Helvetica,Arial;
-        }
-        .container{max-width:1200px;margin:28px auto 64px;padding:0 18px}
-        header{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:16px 20px;margin-bottom:18px;background:linear-gradient(180deg,#fff,#fafcff);border:1px solid var(--line);border-radius:var(--radius-xl);box-shadow:var(--shadow)}
-        header h1{margin:0;font-size:20px;letter-spacing:.2px}
-        header .sub{color:var(--muted);font-size:13px}
-
-        /* CATALOG */
-        .catalog{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-        @media(max-width:980px){.catalog{grid-template-columns:1fr 1fr}}
-        @media(max-width:640px){.catalog{grid-template-columns:1fr}}
-
-        .kcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform .08s ease, box-shadow .2s ease}
-        .kcard:hover{transform:translateY(-2px);box-shadow:0 16px 32px rgba(17,24,39,.14)}
-        .khero{height:160px;background:#dfe8ff; display:flex;align-items:center;justify-content:center;}
-        .khero.web{background: radial-gradient(120px 90px at 20% 30%, #9ed1ff, transparent), linear-gradient(135deg,#88b6ff,#dbe7ff)}
-        .khero.db{background: radial-gradient(140px 100px at 80% 30%, #9ff1d9, transparent), linear-gradient(135deg,#7adbc4,#e6fff8)}
-        .khero.list{background: radial-gradient(140px 100px at 60% 20%, #ffdaa6, transparent), linear-gradient(135deg,#ffd18a,#fff3dc)}
-        .kbody{padding:18px}
-        .kfeat{font-size:11px;letter-spacing:.14em;color:#6675a2;text-transform:uppercase}
-        .kttl{font: 600 20px/1.35 "Iowan Old Style", Georgia, "Noto Serif KR", serif; margin:8px 0 6px}
-        .kdesc{font-size:13px;color:var(--muted)}
-
-        .footer{margin-top:18px;color:var(--muted);font-size:12px;text-align:right}
-
-        .btn{border:0;background:var(--accent);color:#fff;font-weight:800;letter-spacing:.2px;padding:10px 14px;border-radius:12px;cursor:pointer;box-shadow:var(--shadow)}
-        .btn:active{transform:translateY(1px) scale(.99)}
-        .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
-        .btn-secondary{background:#edf2ff;color:#27408b;border:1px solid var(--line)}
-        .btn-danger{background:var(--danger)}
-
-        .hr{height:1px;background:linear-gradient(90deg,transparent,#e5ebff,transparent);margin:14px 0}
-
-        /* BUILDER VIEW */
-        .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
-        @media(max-width:1024px){.grid{grid-template-columns:1fr}}
-        .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-xl);box-shadow:var(--shadow);padding:18px}
-        .card h2{margin:0 0 10px;font-size:18px}
-        .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-        .row-1{grid-template-columns:1fr}
-        @media(max-width:720px){.row{grid-template-columns:1fr}}
-
-        label{display:block;font-size:12px;color:var(--muted);margin:8px 2px 6px}
-        input,select,textarea{width:100%;padding:11px 12px;color:var(--text);background:#fff;border:1px solid var(--line);border-radius:12px;outline:none}
-        input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.18)}
-        .help{font-size:12px;color:var(--muted);margin-top:6px}
-
-        .result{background:#fbfdff;border:1px dashed var(--line);padding:12px;border-radius:12px;margin-top:10px;max-height:340px;overflow:auto;font-family:ui-monospace,Consolas,Menlo,monospace;font-size:13px}
-        .list{display:grid;gap:10px}
-        .row-item{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff}
-        .row-item .meta{font-size:13px;color:var(--muted)}
-        .status{display:inline-flex;align-items:center;gap:8px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800}
-        .ok{background:#ecfdf5;color:#065f46}
-        .bad{background:#fef2f2;color:#7f1d1d}
-        .warn{background:#fffbeb;color:#7c2d12}
-
-        .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-        .loader{width:16px;height:16px;border:3px solid rgba(0,0,0,.08);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
-        @keyframes spin{to{transform:rotate(360deg)}}
-        .kbd{padding:2px 6px;border-radius:6px;background:#eef3ff;border:1px solid var(--line);font-size:12px}
-
-        #toast{position:fixed;right:18px;bottom:18px;display:grid;gap:10px;z-index:9999}
-        .toast{background:#0f172a;color:#fff;border:1px solid #334155;padding:12px 14px;border-radius:12px;box-shadow:var(--shadow);animation:slideIn .2s ease}
-        @keyframes slideIn{from{transform:translateY(6px);opacity:0}to{transform:translateY(0);opacity:1}}
-
-        /* Web/DB 카드 전체 세로 길이 늘리기 */
-        .kcard[data-role="web"],
-        .kcard[data-role="db"],
-        .kcard[data-role="orders-card"] {
-        min-height: 520px;   /* 원하는 값으로 조절 (예: 520~600px) */
-        display: flex;       /* 내용이 아래로 늘어나도록 */
-        flex-direction: column;
-        }
-
-        /* 상단 컬러(히어로) 영역을 더 작게 */
-        .kcard[data-role="web"] .khero,
-        .kcard[data-role="db"] .khero,
-         .kcard[data-role="orders-card"] .khero{
-          height: 120px;       /* 기존 240px → 120px (원하시면 100~140px로 조절) */
-        }
-
-        /* 흰 본문 영역이 남은 공간을 꽉 채우도록 */
-        .kcard[data-role="web"] .kbody,
-        .kcard[data-role="db"] .kbody,
-        .kcard[data-role="orders-card"] .kbody,{
-          flex: 1;             /* 남은 공간을 본문이 차지 */
-          display: flex;
-          flex-direction: column;
-        }
-
-    </style>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>템플릿 기반 VM 카탈로그</title>
+    <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<div class="container">
-    <header>
-        <div>
-            <h1>템플릿 기반 VM 카탈로그 — 오프라인</h1>
-            <div class="sub">카드를 골라 역할(Web/DB) 템플릿으로 VM을 만들거나, 인스턴스 목록을 확인하세요.</div>
-        </div>
-        <div class="toolbar">
-            <button class="btn-secondary" id="btnGoCatalog" style="display:none">카탈로그로</button>
-            <button class="btn-secondary" id="btnLoadDefaults">기본값 불러오기</button>
-            <button class="btn-secondary" id="btnSaveDefaults">기본값 저장</button>
-        </div>
-    </header>
+<!-- 상단 바 -->
+<header class="topbar">
+    <div class="container bar">
+        <button id="btnHome" class="brand">
+            <svg class="icon globe" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3a9 9 0 100 18 9 9 0 000-18z"/>
+            </svg>
+            <span>템플릿 기반 VM 카탈로그</span>
+        </button>
+        <span class="subtle">오프라인 대응 • OpenStack + Terraform</span>
+    </div>
+</header>
 
-    <!-- CATALOG VIEW -->
-    <section id="viewCatalog">
-        <div class="catalog">
-            <article class="kcard" data-role="web">
-                <div class="khero web"></div>
-                <div class="kbody">
-                    <div class="kfeat">FEATURED</div>
-                    <div class="kttl">Web (Offline)</div>
-                    <div class="kdesc">nginx 포함 골든 이미지 권장. cloud-init으로 사용자/키/hostname 설정과 기본 index.html 배포.</div>
-                </div>
-            </article>
+<main class="container">
+    <!-- 알림 -->
+    <div id="alert" class="alert is-hidden"></div>
 
-            <article class="kcard" data-role="db">
-                <div class="khero db"></div>
-                <div class="kbody">
-                    <div class="kfeat">FEATURED</div>
-                    <div class="kttl">DB (Offline)</div>
-                    <div class="kdesc">MySQL/MariaDB 포함 골든 이미지 권장. 데이터 디렉터리 준비 & 서비스 enable.</div>
-                </div>
-            </article>
-
-            <!-- Instances list card (live mini list + delete) -->
-            <article class="kcard" data-role="orders-card" style="cursor:default">
-                <div class="khero list"></div>
-                <div class="kbody">
-                    <div class="kfeat">DASHBOARD</div>
-                    <div class="kttl" style="display:flex;justify-content:space-between;align-items:center">
-                        <span>Instances / Orders</span>
-                        <span class="toolbar">
-                <button class="btn-secondary" id="miniRefresh">새로고침</button>
-                <button class="btn" id="openBuilder">열기</button>
-              </span>
-                    </div>
-                    <div class="kdesc">현재 생성된 VM 일부를 보여줍니다. 여기서 바로 삭제할 수 있습니다.</div>
-                    <div class="hr"></div>
-                    <div id="miniList" class="list"></div>
-                </div>
-            </article>
-        </div>
-        <div class="footer">ⓘ 오프라인 모드: 플로팅 IP(FIP) 기능은 숨김 처리되었습니다. 내부 네임스페이스 경유 테스트 권장.</div>
-    </section>
-
-    <!-- BUILDER VIEW (two-pane) -->
-    <section id="viewBuilder" style="display:none">
+    <!-- 뷰: 카탈로그 -->
+    <section id="viewCatalog" class="view">
+        <h1 class="h1">카탈로그</h1>
         <div class="grid">
-            <section class="card">
-                <h2 id="builderTitle">VM 생성</h2>
-                <div class="row">
-                    <div>
-                        <label>Order ID <span class="help">(비우면 자동생성)</span></label>
-                        <div class="row" style="grid-template-columns:1fr auto;gap:8px">
-                            <input id="orderId" placeholder="예) ord-2025-10-24-001" />
-                            <button class="btn-ghost" id="btnGenOrder">자동생성</button>
+            <!-- Web 카드 -->
+            <button class="card" id="cardWeb">
+                <div class="card-inner">
+                    <div class="card-head">
+                        <div class="badge sky">
+                            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>
+                        </div>
+                        <div>
+                            <div class="card-title">웹</div>
+                            <div class="muted">Nginx 골든 이미지 • 비밀번호 로그인</div>
                         </div>
                     </div>
-                    <div>
-                        <label>Hostname</label>
-                        <input id="hostname" placeholder="예) web-01" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div>
-                        <label>Key Name (SSH)</label>
-                        <input id="keyName" placeholder="예) default-key" />
-                    </div>
-                    <div>
-                        <label>Name (Terraform)</label>
-                        <input id="name" placeholder="예) vm-web-01" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div>
-                        <label>Network ID (Neutron UUID)</label>
-                        <input id="networkId" placeholder="예) 4b236a9e-63f0-400a-89ed-45b1891dd8bd" />
-                    </div>
-                    <div>
-                        <label>Image ID (Glance UUID)</label>
-                        <input id="imageId" placeholder="예) 06e0aabf-5296-41d7-b41a-eb3f40a087e4" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div>
-                        <label>Flavor ID</label>
-                        <input id="flavorId" placeholder="예) 1 (또는 m1.small 등)" />
-                    </div>
-                    <div>
-                        <label>API Base</label>
-                        <input id="apiBase" placeholder="비우면 /api" />
-                    </div>
-                </div>
 
-                <div class="hr"></div>
-                <div class="toolbar">
-                    <button class="btn" id="btnCreate"><span class="loader" id="spinCreate" style="display:none"></span> VM 생성</button>
-                    <button class="btn-ghost" id="btnReset">입력 초기화</button>
-                </div>
+                    <p class="card-text">웹 VM 1대를 생성합니다. 이미지에 Nginx가 있으면 cloud-init이 활성화하고 테스트 페이지를 배포합니다.</p>
 
-                <h3 style="margin-top:12px">최근 응답</h3>
-                <div class="result" id="createResult">아직 결과가 없습니다.</div>
-            </section>
+                    <!-- 가운데 채움: 구성 일러스트 + 핵심 포인트 -->
+                    <div class="illus illus-web">
+                        <!-- 간단 다이어그램 -->
+                        <svg viewBox="0 0 300 160" aria-hidden="true">
+                            <defs>
+                                <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0" stop-color="#bae6fd"/>
+                                    <stop offset="1" stop-color="#e0f2fe"/>
+                                </linearGradient>
+                            </defs>
+                            <rect x="8" y="10" width="284" height="140" rx="10" fill="url(#g1)" opacity="0.35"/>
+                            <g fill="#0369a1" opacity="0.9">
+                                <rect x="22" y="36" width="70" height="30" rx="6"/>
+                                <rect x="115" y="36" width="70" height="30" rx="6"/>
+                                <rect x="208" y="36" width="70" height="30" rx="6"/>
+                            </g>
+                            <text x="57"  y="56" text-anchor="middle" font-size="12" fill="#0c4a6e">템플릿</text>
+                            <text x="150" y="56" text-anchor="middle" font-size="12" fill="#0c4a6e">Terraform</text>
+                            <text x="243" y="56" text-anchor="middle" font-size="12" fill="#0c4a6e">OpenStack</text>
+                            <path d="M92 51h20M185 51h20" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
+                            <g>
+                                <rect x="70" y="95" width="160" height="40" rx="8" fill="#fff"/>
+                                <rect x="78" y="102" width="144" height="10" rx="5" fill="#93c5fd"/>
+                                <rect x="78" y="118" width="100" height="8" rx="4" fill="#bfdbfe"/>
+                            </g>
+                            <text x="150" y="90" text-anchor="middle" font-size="12" fill="#0c4a6e">VM 부팅 → Nginx 활성화</text>
+                        </svg>
 
-            <aside class="card">
-                <div class="toolbar" style="justify-content:space-between">
-                    <h2 style="margin:0">인스턴스 목록</h2>
-                    <div class="toolbar">
-                        <button class="btn-secondary" id="btnRefresh">새로고침</button>
-                        <button class="btn-secondary" id="btnPurgeLocal">로컬 기록 비우기</button>
+                        <ul class="spec">
+                            <li>역할: 정적 웹 테스트</li>
+                            <li>cloud-init: hostname, nginx enable, index.html 배포</li>
+                            <li>보안그룹: 22/tcp(옵션), 80/tcp</li>
+                        </ul>
+                    </div>
+
+                    <div class="cta sky">템플릿 사용
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
                     </div>
                 </div>
-                <div class="hr"></div>
-                <div class="list" id="orderList"></div>
-            </aside>
+            </button>
+
+            <!-- DB 카드 -->
+            <button class="card" id="cardDb">
+                <div class="card-inner">
+                    <div class="card-head">
+                        <div class="badge green">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M4 6c0-2 4-4 8-4s8 2 8 4-4 4-8 4-8-2-8-4zM4 12c0-2 4-4 8-4s8 2 8 4M4 18c0 2 4 4 8 4s8-2 8-4"/></svg>
+                        </div>
+                        <div>
+                            <div class="card-title">DB</div>
+                            <div class="muted">MariaDB/MySQL 골든 이미지 • 비밀번호 로그인</div>
+                        </div>
+                    </div>
+
+                    <p class="card-text">DB VM 1대를 생성합니다. 데이터 디렉터리를 준비하고 서비스가 있으면 활성화합니다.</p>
+
+                    <div class="illus illus-db">
+                        <svg viewBox="0 0 300 160" aria-hidden="true">
+                            <defs>
+                                <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0" stop-color="#bbf7d0"/>
+                                    <stop offset="1" stop-color="#dcfce7"/>
+                                </linearGradient>
+                            </defs>
+                            <rect x="8" y="10" width="284" height="140" rx="10" fill="url(#g2)" opacity="0.35"/>
+                            <!-- DB 실린더 -->
+                            <ellipse cx="90" cy="54" rx="42" ry="12" fill="#10b981"/>
+                            <rect   x="48" y="54" width="84" height="44" rx="8" fill="#34d399"/>
+                            <ellipse cx="90" cy="98" rx="42" ry="12" fill="#10b981"/>
+                            <!-- 데이터 볼륨 -->
+                            <rect x="170" y="40" width="90" height="26" rx="6" fill="#86efac"/>
+                            <text x="215" y="56" text-anchor="middle" font-size="12" fill="#065f46">/dev/vdb</text>
+                            <path d="M132 70C170 70 170 70 170 53" stroke="#22c55e" stroke-width="3" fill="none"/>
+                            <text x="150" y="120" text-anchor="middle" font-size="12" fill="#065f46">서비스 enable • 데이터 디렉터리 마운트</text>
+                        </svg>
+
+                        <ul class="spec">
+                            <li>역할: 단일 DB 노드</li>
+                            <li>cloud-init: 데이터 디렉터리 준비, 서비스 enable</li>
+                            <li>포트: 3306/tcp 내부 전용</li>
+                        </ul>
+                    </div>
+
+                    <div class="cta green">템플릿 사용
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                    </div>
+                </div>
+            </button>
+
+            <!-- 인스턴스 목록 카드 -->
+            <button class="card" id="cardInstances">
+                <div class="card-inner">
+                    <div class="card-head">
+                        <div class="badge indigo">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M6 4h12v4H6zM6 10h12v4H6zM6 16h12v4H6z"/></svg>
+                        </div>
+                        <div>
+                            <div class="card-title">인스턴스 목록</div>
+                            <div class="muted">연결된 OpenStack의 모든 VM 보기</div>
+                        </div>
+                    </div>
+
+                    <p class="card-text">상태, IP, 콘솔 링크를 빠르게 확인합니다.</p>
+
+                    <div class="illus illus-list">
+                        <svg viewBox="0 0 300 160" aria-hidden="true">
+                            <defs>
+                                <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0" stop-color="#c7d2fe"/>
+                                    <stop offset="1" stop-color="#e0e7ff"/>
+                                </linearGradient>
+                            </defs>
+                            <rect x="8" y="10" width="284" height="140" rx="10" fill="url(#g3)" opacity="0.35"/>
+                            <g fill="#fff" stroke="#c7d2fe">
+                                <rect x="28" y="38" width="244" height="24" rx="6"/>
+                                <rect x="28" y="70" width="244" height="24" rx="6"/>
+                                <rect x="28" y="102" width="244" height="24" rx="6"/>
+                            </g>
+                            <g>
+                                <circle cx="42" cy="50" r="6" fill="#10b981"/>
+                                <circle cx="42" cy="82" r="6" fill="#f59e0b"/>
+                                <circle cx="42" cy="114" r="6" fill="#ef4444"/>
+                            </g>
+                            <text x="80" y="54" font-size="12" fill="#4338ca">web-01 • 10.0.0.15</text>
+                            <text x="80" y="86" font-size="12" fill="#4338ca">db-01 • 10.0.0.23</text>
+                            <text x="80" y="118" font-size="12" fill="#4338ca">api-01 • 10.0.0.31</text>
+                        </svg>
+
+                        <ul class="spec">
+                            <li>상태: BUILD → ACTIVE</li>
+                            <li>정보: 이름, IP, 콘솔 링크</li>
+                        </ul>
+                    </div>
+
+                    <div class="cta indigo">목록 열기
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                    </div>
+                </div>
+            </button>
         </div>
     </section>
-</div>
 
-<div id="toast"></div>
-
-<script>
-    const $=(s)=>document.querySelector(s);
-    const toastBox=$('#toast');
-    function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;toastBox.appendChild(t);setTimeout(()=>t.remove(),3500)}
-
-    let selectedRole = 'web'; // web | db
-
-    // --- View switching ---
-    function goCatalog(){
-      $('#viewCatalog').style.display='';
-      $('#viewBuilder').style.display='none';
-      $('#btnGoCatalog').style.display='none';
-      refreshOrdersMini();
-    }
-    function goBuilder(role){
-      selectedRole = role || 'web';
-      $('#viewCatalog').style.display='none';
-      $('#viewBuilder').style.display='';
-      $('#btnGoCatalog').style.display='';
-      updateBuilderTitle();
-      refreshOrders();
-    }
-    function updateBuilderTitle(){
-      const t = selectedRole==='web' ? 'VM 생성 — Web (Offline)' : 'VM 생성 — DB (Offline)';
-      $('#builderTitle').textContent = t;
-    }
-
-    // --- Catalog card interactions ---
-    document.querySelector('[data-role="web"]').addEventListener('click',()=>goBuilder('web'));
-    document.querySelector('[data-role="db"]').addEventListener('click',()=>goBuilder('db'));
-    document.addEventListener('click',(e)=>{
-      if(e.target.id==='miniRefresh') refreshOrdersMini();
-      if(e.target.id==='openBuilder') goBuilder('web');
-    });
-
-    // --- Defaults (per role) ---
-    const defaultsKey=(role)=>`vmcatalog.defaults.${role}.v3`;
-    function saveDefaults(){
-      const role = selectedRole || 'web';
-      const obj = {
-        apiBase: $('#apiBase').value.trim(),
-        networkId: $('#networkId').value.trim(),
-        imageId: $('#imageId').value.trim(),
-        flavorId: $('#flavorId').value.trim(),
-        keyName: $('#keyName').value.trim()
-      };
-      localStorage.setItem(defaultsKey(role), JSON.stringify(obj));
-      toast('기본값 저장됨');
-    }
-    function loadDefaults(){
-      const role = selectedRole || 'web';
-      const raw = localStorage.getItem(defaultsKey(role));
-      if(!raw){ toast('저장된 기본값이 없습니다'); return; }
-      try{
-        const d = JSON.parse(raw);
-        ['apiBase','networkId','imageId','flavorId','keyName'].forEach(k=>{ if(d[k]) $(`#${k}`).value = d[k]; });
-        toast('기본값 불러오기 완료');
-      }catch{ toast('기본값 파싱 실패'); }
-    }
-
-    // --- Helpers ---
-    function genOrderId(){ return (crypto?.randomUUID? 'ord-'+crypto.randomUUID(): 'ord-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8)); }
-    function getApiBase(){ const v=$('#apiBase')? $('#apiBase').value.trim() : ''; return v||'/api'; }
-    function endpointByRole(){ return selectedRole==='db' ? '/orders/db' : '/orders/web'; }
-    function ensurePayload(){
-      const orderId=$('#orderId').value.trim()||genOrderId(); $('#orderId').value=orderId;
-      const payload={ orderId, hostname:$('#hostname').value.trim(), name:$('#name').value.trim()||$('#hostname').value.trim()||orderId, networkId:$('#networkId').value.trim(), imageId:$('#imageId').value.trim(), flavorId:$('#flavorId').value.trim(), keyName:$('#keyName').value.trim() };
-      const miss=Object.entries(payload).filter(([k,v])=>!v).map(([k])=>k);
-      if(miss.length) throw new Error('필수 입력 누락: '+miss.join(', '));
-      return payload;
-    }
-
-    // --- Create VM ---
-    const localLogKey='vmcatalog.local.logs.v3';
-    function pushLocalLog(entry){ const arr=JSON.parse(localStorage.getItem(localLogKey)||'[]'); arr.unshift({...entry, ts:new Date().toISOString()}); localStorage.setItem(localLogKey, JSON.stringify(arr.slice(0,80))); renderLocalOrders(); }
-
-    async function createVm(){
-      const spin=$('#spinCreate');
-      try{
-        const payload=ensurePayload();
-        spin.style.display='inline-block';
-        $('#createResult').textContent=JSON.stringify({status:'요청 전송 중', role:selectedRole, payload}, null, 2);
-        const res=await fetch(getApiBase()+endpointByRole(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-        const ct=res.headers.get('content-type')||''; const body=ct.includes('application/json')? await res.json(): await res.text();
-        if(!res.ok) throw new Error(typeof body==='string'? body: JSON.stringify(body));
-        $('#createResult').textContent = typeof body==='string'? body: JSON.stringify(body,null,2);
-        pushLocalLog({type:'CREATE', role:selectedRole, ok:true, orderId:payload.orderId, response:body});
-        toast('VM 생성 요청 완료');
-        refreshOrders();
-        refreshOrdersMini();
-      }catch(e){
-        $('#createResult').textContent = JSON.stringify({error:true,message:e.message||String(e)}, null, 2);
-        pushLocalLog({type:'CREATE', role:selectedRole, ok:false, error:String(e)});
-        toast('생성 실패 — 기본값(네트워크/이미지/플레이버/키) 확인');
-      } finally{ spin.style.display='none'; }
-    }
-
-    // --- Orders list (builder) ---
-    async function refreshOrders(){
-      const list=$('#orderList'); if(!list) return; list.innerHTML='로드 중…';
-      try{ const res=await fetch(getApiBase()+'/orders'); if(!res.ok) throw new Error('서버 목록 API 없음'); const data=await res.json(); renderServerOrders(list, Array.isArray(data)? data : (data.items||[])); }
-      catch(e){ renderLocalOrders(); toast('서버 목록 API가 없어 로컬 기록만 표시합니다'); }
-    }
-
-    function renderServerOrders(listEl, items){
-      if(!items.length){ listEl.innerHTML='<div class="help">서버에서 받은 주문이 없습니다.</div>'; return; }
-      listEl.innerHTML='';
-      items.forEach(it=>{
-        const r=document.createElement('div'); r.className='row-item';
-        const status=(it.status||'ACTIVE').toUpperCase();
-        r.innerHTML=`<div>
-            <div><b>${it.name||it.serverName||it.orderId||'(no name)'} </b> <span class="status ${status==='ACTIVE'?'ok':(status==='BUILD'?'warn':'bad')}">${status}</span></div>
-            <div class="meta">orderId: ${it.orderId||'-'} · serverId: ${it.serverId||'-'} · ip: ${formatIp(it.ipInfo)}</div>
-            ${it.consoleUrl? `<div class="meta"><a href="${it.consoleUrl}" target="_blank">콘솔 열기(noVNC)</a></div>`:''}
-          </div>
-          <div class="toolbar">
-            <button class="btn-danger" data-id="${it.orderId}">삭제</button>
-          </div>`;
-        r.querySelector('button').addEventListener('click',(ev)=>{ const id = ev.target.dataset.id; destroyVm(id); });
-        listEl.appendChild(r);
-      })
-    }
-
-    function renderLocalOrders(){
-      const list=$('#orderList'); if(!list) return;
-      const arr=JSON.parse(localStorage.getItem(localLogKey)||'[]').filter(x=>x.type==='CREATE');
-      if(!arr.length){ list.innerHTML='<div class="help">로컬 기록이 없습니다.</div>'; return; }
-      list.innerHTML='';
-      arr.forEach(it=>{
-        const r=document.createElement('div'); r.className='row-item';
-        r.innerHTML=`<div>
-            <div><b>${it.orderId||'(no id)'} / ${it.role||''}</b> <span class="status ${it.ok?'ok':'bad'}">${it.ok?'OK':'ERR'}</span></div>
-            <div class="meta">${new Date(it.ts).toLocaleString()} · ${it.type}</div>
-          </div>
-          <div class="toolbar"><button class="btn-danger" data-id="${it.orderId||''}">삭제</button></div>`;
-        r.querySelector('button').addEventListener('click',(ev)=>{ const id = ev.target.dataset.id; if(id) destroyVm(id); });
-        list.appendChild(r);
-      })
-    }
-
-    function formatIp(ipInfo){ try{ if(typeof ipInfo==='string') return ipInfo; if(Array.isArray(ipInfo)) return ipInfo.join(', '); if(ipInfo && typeof ipInfo==='object') return JSON.stringify(ipInfo); return '-'; }catch{ return '-'; } }
-
-    // --- Mini list on catalog view ---
-    async function refreshOrdersMini(){
-      const wrap = document.querySelector('#miniList'); if(!wrap) return;
-      wrap.innerHTML = '<div class="help">로드 중…</div>';
-      try{ const res = await fetch(getApiBase()+'/orders'); if(!res.ok) throw new Error('no api'); const data = await res.json(); const items = Array.isArray(data)? data : (data.items||[]); renderMiniList(wrap, items||[]); }
-      catch{ const arr=JSON.parse(localStorage.getItem(localLogKey)||'[]'); const mapped = arr.filter(x=>x.type==='CREATE' && x.ok).map(x=>({orderId:x.orderId, name:x.orderId, status:'ACTIVE'})); renderMiniList(wrap, mapped); }
-    }
-    function renderMiniList(el, items){
-      if(!items.length){ el.innerHTML = '<div class="help">표시할 인스턴스가 없습니다.</div>'; return; }
-      const top = items.slice(0,4);
-      el.innerHTML = '';
-      top.forEach(it=>{
-        const row = document.createElement('div');
-        row.className = 'row-item';
-        const status = (it.status||'ACTIVE').toUpperCase();
-        row.innerHTML = `<div>
-          <div><b>${it.name||it.serverName||it.orderId}</b> <span class="status ${status==='ACTIVE'?'ok':(status==='BUILD'?'warn':'bad')}">${status}</span></div>
-          <div class="meta">orderId: ${it.orderId}</div>
+    <!-- 뷰: 생성 -->
+    <section id="viewCreate" class="view is-hidden">
+        <div class="toolbar">
+            <button id="btnBackFromCreate" class="link">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> 뒤로
+            </button>
+            <h1 id="createTitle" class="h1">생성</h1>
         </div>
-        <div class="toolbar"><button class="btn-danger" data-id="${it.orderId}">삭제</button></div>`;
-        row.querySelector('button').addEventListener('click', (ev)=>{ const id = ev.target.dataset.id; destroyVm(id); });
-        el.appendChild(row);
-      });
-    }
 
-    // --- Destroy ---
-    async function destroyVm(orderId){
-      if(!orderId){ toast('삭제할 Order ID가 없습니다'); return; }
-      try{
-        const res=await fetch(getApiBase()+'/orders/'+encodeURIComponent(orderId),{method:'DELETE'});
-        if(!res.ok){ const txt=await res.text(); throw new Error(`서버 오류 ${res.status}: ${txt}`); }
-        toast('삭제 요청 완료');
-        pushLocalLog({type:'DESTROY', ok:true, orderId});
-        refreshOrders();
-        refreshOrdersMini();
-      }catch(e){ toast('삭제 실패: '+(e?.message||e)); pushLocalLog({type:'DESTROY', ok:false, orderId, error:String(e)}); }
-    }
+        <div class="panel">
+            <div class="field">
+                <label class="label">이름(호스트네임)</label>
+                <input id="inputName" class="input" placeholder="web-01 또는 db-01" />
+                <div class="help">OpenStack 인스턴스 이름과 게스트 OS 호스트네임 모두 이 값으로 설정됩니다.</div>
+            </div>
 
-    // Wire up
-    $('#btnGoCatalog').addEventListener('click', goCatalog);
-    $('#btnGenOrder').addEventListener('click', ()=>{ $('#orderId').value=genOrderId(); toast('Order ID 자동생성') });
-    $('#btnCreate').addEventListener('click', createVm);
-    $('#btnReset').addEventListener('click', ()=>{ ['hostname','name','keyName','networkId','imageId','flavorId'].forEach(id=>$('#'+id).value=''); toast('입력 초기화') });
-    $('#btnRefresh').addEventListener('click', refreshOrders);
-    $('#btnPurgeLocal').addEventListener('click', ()=>{ localStorage.removeItem(localLogKey); renderLocalOrders(); toast('로컬 기록 삭제됨') });
-    $('#btnSaveDefaults').addEventListener('click', saveDefaults);
-    $('#btnLoadDefaults').addEventListener('click', loadDefaults);
+            <div class="actions">
+                <button id="btnCreate" class="btn primary">
+                    <span class="spinner is-hidden" id="spinnerCreate"></span>
+                    생성
+                </button>
+                <button id="btnCancelCreate" class="btn">취소</button>
+            </div>
+        </div>
+    </section>
 
-    // Init
-    goCatalog();
-    refreshOrdersMini();
-</script>
+    <!-- 뷰: 인스턴스 -->
+    <section id="viewInstances" class="view is-hidden">
+        <div class="toolbar">
+            <button id="btnBackFromInstances" class="link">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> 뒤로
+            </button>
+            <h1 class="h1">인스턴스</h1>
+            <div class="spacer"></div>
+            <button id="btnReload" class="btn ghost">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M4 4v6h6M20 20v-6h-6M5 19A8 8 0 1119 5"/></svg>
+                새로고침
+            </button>
+        </div>
+
+        <div id="instancesGrid" class="grid instances"></div>
+        <div id="instancesEmpty" class="empty is-hidden">표시할 인스턴스가 없습니다.</div>
+        <div id="instancesLoading" class="loading is-hidden">
+            <span class="spinner"></span> 불러오는 중…
+        </div>
+        <div id="instancesError" class="error is-hidden"></div>
+    </section>
+</main>
+
+<script src="app.js"></script>
 </body>
 </html>

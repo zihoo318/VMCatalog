@@ -19,7 +19,7 @@ terraform { # 필요한 프로바이더 선언/버전 고정 등 전역 설정
 # OS_AUTH_URL, OS_USERNAME, OS_PASSWORD, OS_PROJECT_NAME, OS_USER_DOMAIN_NAME, OS_PROJECT_DOMAIN_NAME, OS_REGION_NAME
 provider "openstack" {}
 
-# 실제로 만들 리소스(여기선 VM)
+# 실제로 만들 리소스(VM)
 # openstack_compute_instance_v2 타입(= Nova 인스턴스)
 resource "openstack_compute_instance_v2" "vm" {
   name         = var.name

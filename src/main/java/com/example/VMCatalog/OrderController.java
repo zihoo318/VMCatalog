@@ -1,7 +1,8 @@
 package com.example.VMCatalog;
 
 import com.example.VMCatalog.DTO.OrderRequest;
-import com.example.VMCatalog.TerraformService;
+import com.example.VMCatalog.DTO.OrderResult;
+import com.example.VMCatalog.Openstack.OpenStackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,15 +13,15 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
     private final TerraformService tf;
 
-    @PostMapping("/web")
-    public ResponseEntity<?> create(@RequestBody OrderRequest dto) throws Exception {
-        return ResponseEntity.ok(tf.applyByTemplate(dto));
+    @PostMapping
+    public ResponseEntity<OrderResult> create(@RequestBody OrderRequest dto) throws Exception {
+        OrderResult ok = tf.applyByTemplate(dto);
+        return ResponseEntity.ok(ok);
     }
 
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<?> delete(@PathVariable String orderId) throws Exception {
+    public ResponseEntity<Void> delete(@PathVariable String orderId) throws Exception {
         tf.destroy(orderId);
         return ResponseEntity.noContent().build();
     }
-
 }

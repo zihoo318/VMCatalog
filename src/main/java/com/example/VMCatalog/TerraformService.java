@@ -29,9 +29,9 @@ public class TerraformService {
     @Value("${app.defaults.flavorId}")  private String defaultFlavorId;
 
     // 역할별 cloud-init 템플릿 경로(미설정 시 classpath 기본값 사용)
-    @Value("${app.templates.web.tpl:classpath:/infra/terraform/cloudinit-templates/web.yaml.tpl}")
+    @Value("${app.templates.web.tpl:classpath:/cloudinit-templates/web.yaml}")
     private String webTplPath;
-    @Value("${app.templates.db.tpl:classpath:/infra/terraform/cloudinit-templates/db.yaml.tpl}")
+    @Value("${app.templates.db.tpl:classpath:/cloudinit-templates/db.yaml}")
     private String dbTplPath;
 
     private final CloudInitRenderer renderer;      // 기존 사용

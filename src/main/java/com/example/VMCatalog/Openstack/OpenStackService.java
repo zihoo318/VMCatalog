@@ -25,8 +25,8 @@ public class OpenStackService {
     private String username;
     @Value("${OS_PASSWORD:}")
     private String password;
-    @Value("${OS_PROJECT_NAME:}")
-    private String projectName;
+    @Value("${OS_PROJECT_ID:}")
+    private String projectId;
     @Value("${OS_USER_DOMAIN_NAME:}")
     private String userDomainName;
     @Value("${OS_PROJECT_DOMAIN_NAME:}")
@@ -42,7 +42,7 @@ public class OpenStackService {
     public void init() {
         System.out.println("crl=" + authUrl
                 + ", user=" + username
-                + ", project=" + projectName
+                + ", projectId=" + projectId
                 + ", userDomain=" + userDomainName
                 + ", projectDomain=" + projectDomainName
                 + ", region=" + regionName
@@ -52,8 +52,9 @@ public class OpenStackService {
             throw new IllegalStateException("OS_AUTH_URL empty. Check spring.config.import or .env.secret");
         }
 
-        Identifier userDomain    = Identifier.byName(userDomainName);
+        Identifier userDomain = Identifier.byName(userDomainName);
         Identifier projectDomain = Identifier.byName(projectDomainName);
+        Identifier project = Identifier.byId(projectId);
 
         // Config 생성
         var cfg = Config.newConfig();
@@ -63,7 +64,7 @@ public class OpenStackService {
         this.os = OSFactory.builderV3()
                 .endpoint(authUrl)
                 .credentials(username, password, userDomain)
-                .scopeToProject(projectDomain, Identifier.byId(projectName))
+                .scopeToProject(project)
                 .withConfig(cfg)
                 .authenticate();
 

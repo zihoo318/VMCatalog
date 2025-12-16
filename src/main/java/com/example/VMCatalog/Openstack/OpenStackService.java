@@ -31,50 +31,42 @@ public class OpenStackService {
     private String userDomainName;
     @Value("${OS_PROJECT_DOMAIN_NAME:}")
     private String projectDomainName;
-    @Value("${OS_REGION_NAME:}")
-    private String regionName;
     @Value("${OS_INTERFACE:internal}")
     private String iface; // internal|public|admin
 
-    private OSClient.OSClientV3 os;
-
-    @PostConstruct
-    public void init() {
-        System.out.println("crl=" + authUrl
-                + ", user=" + username
-                + ", projectId=" + projectId
-                + ", userDomain=" + userDomainName
-                + ", projectDomain=" + projectDomainName
-                + ", region=" + regionName
-                + ", iface=" + iface);
-
-        if (authUrl == null || authUrl.isBlank()) {
-            throw new IllegalStateException("OS_AUTH_URL empty. Check spring.config.import or .env.secret");
-        }
-
+    private OSClient.OSClientV3 client() {
         Identifier userDomain = Identifier.byName(userDomainName);
         Identifier projectDomain = Identifier.byName(projectDomainName);
-        Identifier project = Identifier.byId(projectId);
 
-        // Config 생성
-        var cfg = Config.newConfig();
-        // 엔드포인트 인터페이스 적용
+        Identifier project = (projectId != null && !projectId.isBlank())
+                ? Identifier.byId(projectId)
+                : null;
+
+        String natHost = java.net.URI.create(authUrl).getHost();
+        var cfg = Config.newConfig().withEndpointNATResolution(natHost);
+        // internal/public/admin 인터페이스 선택 적용
         cfg = Os4jEndpointTypeUtil.applyEndpointInterface(cfg, iface);
 
-        this.os = OSFactory.builderV3()
+        OSClient.OSClientV3 c = OSFactory.builderV3()
                 .endpoint(authUrl)
                 .credentials(username, password, userDomain)
-                .scopeToProject(project)
                 .withConfig(cfg)
                 .authenticate();
 
-        if (regionName != null && !regionName.isBlank()) {
-            this.os.useRegion(regionName);
+        if (project != null) {
+            c = OSFactory.builderV3()
+                    .endpoint(authUrl)
+                    .credentials(username, password, userDomain)
+                    .scopeToProject(project, projectDomain)
+                    .withConfig(cfg)
+                    .authenticate();
         }
+
+        return c;
     }
 
     public List<InstanceDto> listInstances() {
-        List<? extends Server> servers = os.compute().servers().list();
+        List<? extends Server> servers = client().compute().servers().list();
         List<InstanceDto> out = new ArrayList<>(servers.size());
         for (Server s : servers) out.add(toDto(s));
         return out;
@@ -83,7 +75,7 @@ public class OpenStackService {
     private InstanceDto toDto(Server s) {
         String console = null;
         try {
-            VNCConsole v = os.compute().servers().getVNCConsole(s.getId(), VNCConsole.Type.NOVNC);
+            VNCConsole v = client().compute().servers().getVNCConsole(s.getId(), VNCConsole.Type.NOVNC);
             if (v != null) console = v.getURL();
         } catch (Exception ignore) {}
 

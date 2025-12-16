@@ -7,7 +7,7 @@
 # 아래와 같은 내용들로 변수를 채움 (지금은 4개 모두(파일 읽는 user_data 제외) tarraform.tfvars에 있음)
 # 1. CLI 인자: -var, -var-file
 # 2. 환경변수: TF_VAR_<변수명>
-# 3. *.auto.tfvars / terraform.tfvars 파일(자동 로드)
+# 3. *.auto.tfvars / terraform-web.tfvars 파일(자동 로드)
 # 4. 변수 기본값: variables.tf 안에서 default = ...를 지정
 ##############################################
 
@@ -37,7 +37,6 @@ variable "network_id" {
 
 # cloud-init user_data (문자열)
 # terraform.tfvars에서 file("./cloudinit-templates/web.yaml")을 읽어 주입
-variable "user_data" {
-  type        = string
-  description = "Cloud-init user_data content (YAML text)"
+variable "user_data_path" {
+  type = string
 }

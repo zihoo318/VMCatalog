@@ -77,12 +77,12 @@ public class TerraformService {
 
         // terraform.tfvars 작성(공통 스펙 사용)
         String tfvars = """
-                name       = "%s"
-                network_id = "%s"
-                image_id   = "%s"
-                flavor_id  = "%s"
-                user_data  = file("./cloudinit/%s")
-                """.formatted(
+        name          = "%s"
+        network_id    = "%s"
+        image_id      = "%s"
+        flavor_id     = "%s"
+        user_data_path = "./cloudinit/%s"
+        """.formatted(
                 name, defaultNetworkId, defaultImageId, defaultFlavorId, cloudinitFileName
         );
         Files.writeString(orderDir.resolve("terraform.tfvars"), tfvars);

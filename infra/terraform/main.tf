@@ -27,6 +27,6 @@ resource "openstack_compute_instance_v2" "vm" {
   flavor_id    = var.flavor_id
   config_drive = true
   network { uuid = var.network_id }
-  user_data    = var.user_data
+  user_data = file(var.user_data_path)
 }
 

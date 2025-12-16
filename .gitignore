@@ -42,6 +42,7 @@ out/
 *.tfstate
 *.tfstate.*
 .terraform/
-terraform.tfvars
+terraform-web.tfvars
+terraform-db.tfvars
 cloudinit/*.yaml
 .env.secret

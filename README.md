@@ -30,7 +30,8 @@ Terraform과 openstack4j 사용 실습을 위한 학습용 프로젝트입니다
 - infra/terraform : OpenStack VM 프로비저닝 모듈 및 cloud-init 템플릿
 
 ## 실행 방법
-- .env.sample을 참고해서 .env.secret 파일 작성
+- .env.sample 참고해서 .env.secret 파일 작성
+- \infra\terraform\terraform-{db|web}.tfvars.sample 참고해서 .tfvars 파일들 작성
 - 백엔드 실행
 - 웹에서 API 호출로 주문 생성 → VM 상태/콘솔/로그 확인
   - cloud-init 로그: /var/log/cloud-init.log, /var/log/cloud-init-output.log

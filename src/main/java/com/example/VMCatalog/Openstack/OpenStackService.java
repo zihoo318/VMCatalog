@@ -13,7 +13,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -64,7 +68,6 @@ public class OpenStackService {
                     .withConfig(cfg)
                     .authenticate();
         }
-
         return c;
     }
 
@@ -82,12 +85,58 @@ public class OpenStackService {
             if (v != null) console = v.getURL();
         } catch (Exception ignore) {}
 
+        String ip = firstIp(s);
+        String flavor = flavorLabel(s);
+        String image = imageLabel(s);
+
         return new InstanceDto(
                 s.getId(),
                 s.getName(),
                 s.getStatus() != null ? s.getStatus().name() : "UNKNOWN",
-                console
+                console,
+                ip,
+                flavor,
+                image
         );
     }
-}
 
+    // 주소 맵에서 첫 IP를 뽑아 단일 문자열로 반환
+    private String firstIp(Server s) {
+        if (s == null || s.getAddresses() == null) return null;
+        Map<String, List<? extends org.openstack4j.model.compute.Address>> addrs = s.getAddresses().getAddresses();
+        if (addrs == null || addrs.isEmpty()) return null;
+        return addrs.values().stream()
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .map(a -> a.getAddr())
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+    }
+
+    // flavor id/name 반환
+    private String flavorLabel(Server s) {
+        if (s == null) return null;
+        if (s.getFlavor() != null) {
+            String id = s.getFlavor().getId();
+            String name = s.getFlavor().getName();
+            if (name != null && !name.isBlank() && id != null && !id.isBlank()) return name + " (" + id + ")";
+            if (name != null && !name.isBlank()) return name;
+            return id;
+        }
+        return s.getFlavorId();
+    }
+
+    // image id/name 반환
+    private String imageLabel(Server s) {
+        if (s == null) return null;
+        if (s.getImage() != null) {
+            String id = s.getImage().getId();
+            String name = s.getImage().getName();
+            if (name != null && !name.isBlank() && id != null && !id.isBlank()) return name + " (" + id + ")";
+            if (name != null && !name.isBlank()) return name;
+            return id;
+        }
+        return s.getImageId();
+    }
+}

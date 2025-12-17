@@ -134,7 +134,11 @@ function renderInstances(items) {
     const grid = q("#instancesGrid");
     grid.innerHTML = "";
     (items || []).forEach((it) => {
-        const ips = (it.addresses || []).map(a => a.ip).join(", ") || "-";
+        const ips = it.ip || (it.addresses || []).map(a => a.ip).join(", ") || "-";
+        const flavor = it.flavor || it.flavorName || "-";
+        const image = it.image || it.imageName || "-";
+        const role = (it.role || it.template || "").toString().toUpperCase();
+        const name = it.name || "-";
         const st = (it.status || "").toUpperCase();
         let sClass = "s-unknown";
         let sText  = st;
@@ -143,18 +147,40 @@ function renderInstances(items) {
         else if (st === "ERROR") { sClass = "s-error"; sText = "오류(ERROR)"; }
         else if (!st) { sText = "미확인"; }
 
+        const consoleHtml = it.consoleUrl
+            ? `<a class="console-link" href="${it.consoleUrl}" target="_blank" rel="noreferrer">콘솔 열기</a>`
+            : `<span class="muted" style="font-size:12px;">콘솔 URL 없음</span>`;
+
         const el = document.createElement("div");
         el.className = "card instance";
         el.innerHTML = `
       <div class="card-inner">
-        <div class="card-head" style="justify-content:space-between">
-          <div class="card-title">${escapeHtml(it.name || "-")}</div>
+        <div class="card-head">
+          <div>
+            <div class="card-title">${escapeHtml(name)}</div>
+            <div class="muted" style="font-size:12px;margin-top:2px;">${escapeHtml(role || "INSTANCE")}</div>
+          </div>
           <span class="status ${sClass}">${escapeHtml(sText)}</span>
         </div>
-        <div class="kv"><strong>ID:</strong> ${escapeHtml(it.id || "-")}</div>
-        <div class="kv"><strong>IP:</strong> ${escapeHtml(ips)}</div>
-        ${it.consoleUrl ? `<div class="kv"><a href="${it.consoleUrl}" target="_blank">콘솔 열기</a></div>` : ""}
-        <div class="cta indigo" style="margin-top:auto;"></div>
+        <div class="kv">
+          <span class="label">ID</span>
+          <span class="value mono">${escapeHtml(it.id || "-")}</span>
+        </div>
+        <div class="kv">
+          <span class="label">IP</span>
+          <span class="value">${escapeHtml(ips)}</span>
+        </div>
+        <div class="kv">
+          <span class="label">Flavor</span>
+          <span class="value">${escapeHtml(flavor)}</span>
+        </div>
+        <div class="kv">
+          <span class="label">Image</span>
+          <span class="value">${escapeHtml(image)}</span>
+        </div>
+        <div class="kv">
+          ${consoleHtml}
+        </div>
       </div>
     `;
         grid.appendChild(el);

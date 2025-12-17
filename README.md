@@ -4,6 +4,8 @@ Terraform과 openstack4j 사용 실습을 위한 학습용 프로젝트입니다
 오프라인 환경에서도 즉시 VM을 생성·부팅하고, 첫 부팅 시 cloud-init으로 내부 설정을 자동 적용하는 셀프서비스 카탈로그 웹앱입니다. OpenStack과 Terraform을 사용하며, 역할별 템플릿(Web/DB)을 제공합니다.
 ![img.png](img.png)
 
+![img_1.png](img_1.png)
+
 ## 핵심 개념
 - 카탈로그 항목(템플릿): Web, DB 두 종류의 역할 정의. 각 템플릿은 기본 리소스 스펙과 cloud-init 템플릿 경로를 갖습니다.
 - 주문(Order): 사용자가 템플릿을 선택하고 hostname만 입력하면 VM 1대를 온디맨드로 생성합니다.

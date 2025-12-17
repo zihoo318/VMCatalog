@@ -21,6 +21,17 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-app
 /* 레이아웃 */
 .view{margin-top:14px}
 .grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fit, minmax(360px, 1fr))}
+.grid.instances{
+    grid-auto-flow:column;
+    grid-auto-columns:minmax(320px, 1fr);
+    grid-template-rows:1fr;
+    column-gap:18px;
+    row-gap:0;
+    margin-top:16px;
+    overflow-x:auto;
+    padding:4px 6px 12px;
+    scroll-snap-type:x mandatory;
+}
 
 /* 트럼프 카드 비율 카드 */
 .card{
@@ -83,9 +94,37 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-app
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* 인스턴스 카드(비율 동일) */
-.card.instance{cursor:default}
-.kv{font-size:13px;color:#374151;margin-top:6px}
-.status{font-size:12px;padding:3px 10px;border-radius:999px}
+.card.instance{
+    cursor:default;
+    width:100%;
+    max-width:440px;
+    min-width:320px;
+    margin:0 auto;
+    aspect-ratio:auto; /* 내용이 넘치지 않도록 높이를 유동적으로 */
+    min-height:380px;
+    scroll-snap-align:start;
+}
+.card.instance .card-inner{
+    inset:20px;
+    gap:14px;
+}
+.card.instance .card-head{justify-content:space-between;align-items:flex-start}
+.card.instance .card-title{font-size:15px}
+.card.instance .kv{
+    font-size:13px;
+    color:#374151;
+    margin-top:2px;
+    display:grid;
+    gap:3px;
+}
+.card.instance .kv .label{font-size:12px;font-weight:700;color:#4b5563;letter-spacing:.01em}
+.card.instance .kv .value{color:#111827;line-height:1.4}
+.card.instance .kv .value,
+.card.instance .kv .mono{word-break:break-word}
+.card.instance .kv .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-size:12.5px}
+.card.instance .console-link{font-size:12px;font-weight:700;color:var(--indigo);text-decoration:none}
+.card.instance .console-link:hover{text-decoration:underline}
+.status{font-size:12px;padding:4px 10px;border-radius:999px}
 .s-active{background:#d1fae5;color:#065f46}
 .s-build{background:#fef3c7;color:#92400e}
 .s-error{background:#ffe4e6;color:#9f1239}

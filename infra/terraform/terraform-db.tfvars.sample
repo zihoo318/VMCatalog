@@ -1,0 +1,16 @@
+##############################################
+# terraform-db.tfvars
+# - variables.tf에서 정의한 변수에 실제 값을 넣는 곳
+##############################################
+
+# private-net의 네트워크 UUID
+network_id =
+
+# Ubuntu 22.04 또는 nginx가 포함된 골든 이미지 UUID
+image_id   =
+
+# m1.tiny의 ID가 "1"인 환경이 흔함(확인: openstack flavor list)
+flavor_id  =
+
+# cloud-init 파일 내용을 그대로 읽어서 user_data 변수로 전달
+user_data  = file("./cloudinit/db.yaml")

@@ -1,5 +1,5 @@
 # VMCatalog
-Terraform과 openstack4j 사용 실습을 위한 프로젝트입니다.
+Terraform과 openstack4j 사용 실습을 위한 학습용 프로젝트입니다.
 
 오프라인 환경에서도 즉시 VM을 생성·부팅하고, 첫 부팅 시 cloud-init으로 내부 설정을 자동 적용하는 셀프서비스 카탈로그 웹앱입니다. OpenStack과 Terraform을 사용하며, 역할별 템플릿(Web/DB)을 제공합니다.
 ![img.png](img.png)

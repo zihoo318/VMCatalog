@@ -34,6 +34,7 @@ public class OpenStackService {
     @Value("${OS_INTERFACE:internal}")
     private String iface; // internal|public|admin
 
+    // OpenStack Keystone(v3) 인증으로 OSClientV3를 생성
     private OSClient.OSClientV3 client() {
         Identifier userDomain = Identifier.byName(userDomainName);
         Identifier projectDomain = Identifier.byName(projectDomainName);
@@ -43,6 +44,8 @@ public class OpenStackService {
                 : null;
 
         String natHost = java.net.URI.create(authUrl).getHost();
+        // 서비스 엔드포인트(URL)의 호스트를 NAT 환경에 맞게 해석/치환
+        // (내부 주소 때문에 API 호출이 죽는 문제(호스트 접근성 문제) 피하기 위해서)
         var cfg = Config.newConfig().withEndpointNATResolution(natHost);
         // internal/public/admin 인터페이스 선택 적용
         cfg = Os4jEndpointTypeUtil.applyEndpointInterface(cfg, iface);
@@ -51,7 +54,7 @@ public class OpenStackService {
                 .endpoint(authUrl)
                 .credentials(username, password, userDomain)
                 .withConfig(cfg)
-                .authenticate();
+                .authenticate(); // 클라이언트 만들기
 
         if (project != null) {
             c = OSFactory.builderV3()

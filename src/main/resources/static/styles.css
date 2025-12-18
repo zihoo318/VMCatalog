@@ -89,6 +89,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-app
 .btn.ghost{background:#fff}
 .btn.primary{background:var(--sky);color:#fff;border-color:transparent}
 .btn.primary:hover{background:#065985}
+.btn.danger{background:#fee2e2;border-color:#fecdd3;color:#991b1b}
+.btn.danger:hover{background:#fecdd3}
 .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .8s linear infinite;margin-right:6px}
 .loading .spinner{border-color:#d1d5db;border-top-color:#6b7280}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -121,6 +123,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-app
 .card.instance .kv .value{color:#111827;line-height:1.4}
 .card.instance .kv .value,
 .card.instance .kv .mono{word-break:break-word}
+.card.instance .kv.kv-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px}
+.card.instance .link-delete{background:none;border:0;padding:4px 6px;border-radius:8px;color:#dc2626;font-weight:700;font-size:12px;cursor:pointer}
+.card.instance .link-delete:hover{text-decoration:underline;background:#fee2e2}
 .card.instance .kv .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-size:12.5px}
 .card.instance .console-link{font-size:12px;font-weight:700;color:var(--indigo);text-decoration:none}
 .card.instance .console-link:hover{text-decoration:underline}

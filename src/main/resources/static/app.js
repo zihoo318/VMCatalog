@@ -151,6 +151,8 @@ function renderInstances(items) {
             ? `<a class="console-link" href="${it.consoleUrl}" target="_blank" rel="noreferrer">콘솔 열기</a>`
             : `<span class="muted" style="font-size:12px;">콘솔 URL 없음</span>`;
 
+        const deleteBtn = `<button class="link-delete" data-id="${escapeHtml(it.id || '')}">삭제</button>`;
+
         const el = document.createElement("div");
         el.className = "card instance";
         el.innerHTML = `
@@ -178,11 +180,28 @@ function renderInstances(items) {
           <span class="label">Image</span>
           <span class="value">${escapeHtml(image)}</span>
         </div>
-        <div class="kv">
-          ${consoleHtml}
+        <div class="kv kv-actions">
+          <div>${consoleHtml}</div>
+          <div>${deleteBtn}</div>
         </div>
       </div>
     `;
+        const delBtn = el.querySelector("button.link-delete");
+        if (delBtn) {
+            delBtn.addEventListener("click", async () => {
+                const targetId = it.id;
+                if (!targetId) { alertMsg("삭제할 ID가 없습니다.", true); return; }
+                if (!confirm(`이 인스턴스(ID: ${targetId})를 삭제할까요?`)) return;
+                try {
+                    const resp = await fetch(`${API_BASE}/api/orders/${encodeURIComponent(targetId)}`, { method: "DELETE" });
+                    if (!resp.ok) throw new Error(await resp.text());
+                    alertMsg("삭제 요청을 보냈습니다.");
+                    loadInstances();
+                } catch (e) {
+                    alertMsg(`삭제 실패: ${e.message || e}`, true);
+                }
+            });
+        }
         grid.appendChild(el);
     });
 }

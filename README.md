@@ -65,7 +65,7 @@ Terraform과 openstack4j를 활용하여
 7) **결과 반환**  
    `terraform output -json`을 파싱해 `serverId/serverName/ipInfo` 등을 `OrderResult`로 응답합니다.
 8) **삭제** (카탈로그로 생성한 인스턴스만 삭제 가능합니다.)  
-   `DELETE /api/orders/{orderId}` → 해당 작업 디렉터리에서 `terraform destroy -auto-approve`.
+   `DELETE /api/orders/{serverId}` → serverId로 해당 작업 디렉터리 매핑 후 해당 위치에서 `terraform destroy -auto-approve`.
 
 
 ---

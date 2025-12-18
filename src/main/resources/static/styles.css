@@ -29,7 +29,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-app
     row-gap:0;
     margin-top:16px;
     overflow-x:auto;
-    padding:4px 6px 12px;
+    overflow-y:hidden;          /* 세로 스크롤 숨기고 여유 공간 확보 */
+    padding:12px 8px 18px;      /* 세로 여백 살짝 확대 */
     scroll-snap-type:x mandatory;
 }
 

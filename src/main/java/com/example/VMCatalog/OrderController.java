@@ -20,8 +20,8 @@ public class OrderController {
     }
 
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<Void> delete(@PathVariable String orderId) throws Exception {
-        tf.destroy(orderId);
+    public ResponseEntity<Void> delete(@PathVariable String serverId) throws Exception {
+        tf.destroyByServerId(serverId);
         return ResponseEntity.noContent().build();
     }
 }

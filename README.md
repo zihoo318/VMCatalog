@@ -89,7 +89,7 @@ Terraform과 openstack4j를 활용하여
 - `OS_INTERFACE`
 
 
-- `.env.sample`을 참고하여 `.env.secret` 파일을 생성합니다.
+    - `.env.sample`을 참고하여 `.env.secret` 파일을 생성합니다.
 
 ### Terraform 변수 파일(tfvars)
 Terraform 실행을 위해 역할별 tfvars 파일이 반드시 필요합니다.
